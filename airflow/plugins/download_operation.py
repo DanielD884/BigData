@@ -1,8 +1,9 @@
 from airflow.plugins_manager import AirflowPlugin
-from operators.kaggle_download_operator import KaggleDownloadOperator
+from operators.kaqqle_download_operator import *
+
 
 class KagglePlugin(AirflowPlugin):
-    name = "kaggle_plugin"
+    name = "download_operation"
     operators = [KaggleDownloadOperator]
     hooks = []
     executors = []

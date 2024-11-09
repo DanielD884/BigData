@@ -8,9 +8,9 @@ services:
     container_name: airflow
     volumes:
       - ./airflow/dags:/home/airflow/airflow/dags
-      - ./airflow/python:/home/airflow/airflow/python
       - ./airflow/plugins:/home/airflow/airflow/plugins
-      - ./data/kaggle/kaggle:/home/airflow/.kaggle/
+      - ./airflow/python:/home/airflow/airflow/python
+      - ./data/kaggle:/home/airflow/.kaggle/
       - ./data/output:/home/airflow/output/
     ports:
       - "8080:8080"

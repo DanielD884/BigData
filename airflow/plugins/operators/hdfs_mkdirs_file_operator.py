@@ -6,7 +6,7 @@ from airflow.exceptions import AirflowException
 from hooks.hdfs_hook import HdfsHook
 
 
-class HdfsMkdirFileOperator(BaseOperator):
+class HdfsMkdirsFileOperator(BaseOperator):
 
     template_fields = ('directory', 'hdfs_conn_id')
     ui_color = '#fcdb03'
@@ -24,17 +24,17 @@ class HdfsMkdirFileOperator(BaseOperator):
         :type hdfs_conn_id: string
         """
 
-        super(HdfsMkdirFileOperator, self).__init__(*args, **kwargs)
+        super(HdfsMkdirsFileOperator, self).__init__(*args, **kwargs)
         self.directory = directory
         self.hdfs_conn_id = hdfs_conn_id
 
     def execute(self, context):
 
-        self.log.info("HdfsMkdirFileOperator execution started.")
+        self.log.info("HdfsMkdirsFileOperator execution started.")
         
         self.log.info("Mkdir HDFS directory'" + self.directory + "'.")
 
         hh = HdfsHook(hdfs_conn_id=self.hdfs_conn_id)
         hh.mkdir(self.directory)
 
-        self.log.info("HdfsMkdirFileOperator done.")
+        self.log.info("HdfsMkdirsFileOperator done.")

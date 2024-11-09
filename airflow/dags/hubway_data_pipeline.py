@@ -1,14 +1,17 @@
 from datetime import datetime
-
 from airflow import DAG
 from airflow.contrib.operators.spark_submit_operator import SparkSubmitOperator
-from airflow.operators.filesystem_operations import CreateDirectoryOperator
-from airflow.operators.filesystem_operations import ClearDirectoryOperator
-from airflow.operators.download_operation import KaggleDownloadOperator
-from airflow.operators.bash_operator import BashOperator
-from airflow.operators.python_operator import PythonOperator
-from python.helpers.year_months_helper import get_year_months
-from airflow.operators.hdfs_plugin import HdfsMkdirsFileOperator, HdfsPutFilesOperator
+from airflow.operators import (
+    ClearDirectoryOperator,
+    CreateDirectoryOperator,
+    HdfsMkdirsFileOperator,
+    HdfsPutFilesOperator,
+    KaggleDownloadOperator,
+)
+from airflow.operators.bash import BashOperator
+from airflow.operators.python import PythonOperator
+from helpers.year_months_helper import get_year_months
+
 
 args = {"owner": "airflow"}
 
@@ -65,8 +68,7 @@ download_hubway_data = KaggleDownloadOperator(
 # Task to get year-months
 get_year_months_op = PythonOperator(
     task_id='get-year-months',
-    python_callable=get_year_months_task,
-    provide_context=True,
+    python_callable=get_year_months,
     dag=dag,
 )
 
@@ -92,11 +94,21 @@ create_hdfs_partition_final = HdfsMkdirsFileOperator(
 get_year_months_op >> [create_hdfs_partition_raw, create_hdfs_partition_final]
 
 # Upload raw data to HDFS
-copy_raw_to_hdfs = HdfsPutFilesOperator(
+load_raw_data = HdfsPutFilesOperator(
     task_id="upload-raw-to-hdfs",
     local_path="/home/airflow/hubway_data/",
     remote_path="/user/hadoop/hubway_data/raw/",
     file_names=["{{ task_instance.xcom_pull(task_ids='get-year-months') }}"],
     hdfs_conn_id="hdfs",
+    dag=dag,
+)
+
+# Clean raw data with python script
+clean_raw_data = SparkSubmitOperator(
+    task_id="clean_raw_data",
+    application="/home/airflow/python/clean_raw_data.py",
+    name="clean_raw_data",
+    conn_id="spark_default",
+    verbose=False,
     dag=dag,
 )
