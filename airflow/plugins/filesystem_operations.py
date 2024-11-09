@@ -1,5 +1,4 @@
 from airflow.plugins_manager import AirflowPlugin
-from operators.copy_file_operator import *
 from operators.create_directory_operator import *
 from operators.clear_directory_operator import *
 

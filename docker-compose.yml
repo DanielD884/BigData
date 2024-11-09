@@ -10,7 +10,7 @@ services:
       - ./airflow/dags:/home/airflow/airflow/dags
       - ./airflow/python:/home/airflow/airflow/python
       - ./airflow/plugins:/home/airflow/airflow/plugins
-      - ./data/kaggle:/home/airflow/.kaggle/
+      - ./data/kaggle/kaggle:/home/airflow/.kaggle/
       - ./data/output:/home/airflow/output/
     ports:
       - "8080:8080"
