@@ -56,10 +56,6 @@ clear_output_dir = ClearDirectoryOperator(
     dag=dag,
 )
 
-# Set task dependencies
-create_local_import_dir >> clear_local_import_dir
-create_output_dir >> clear_output_dir
-
 # Download the Hubway dataset from Kaggle
 download_hubway_data = KaggleDownloadOperator(
     task_id="download_hubway_data",
@@ -117,7 +113,10 @@ clean_raw_data = SparkSubmitOperator(
 )
 
 # Set task dependencies
-clear_local_import_dir >> download_hubway_data
+create_local_import_dir >> clear_local_import_dir
+create_output_dir >> clear_output_dir
+[clear_local_import_dir, clear_output_dir] >> download_hubway_data
 download_hubway_data >> get_year_months_op
+get_year_months_op >> [create_hdfs_raw_data_dir, create_hdfs_final_data_dir]
 create_hdfs_raw_data_dir >> upload_raw_data
 upload_raw_data >> clean_raw_data
