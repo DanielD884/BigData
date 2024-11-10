@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List
 
-def get_year_months(directory: str = "/home/airflow/bike_data") -> List[str]:
+def get_year_months(directory: str = "/home/airflow/hubway_data") -> List[str]:
     path = Path(directory)
     
     if not path.exists():

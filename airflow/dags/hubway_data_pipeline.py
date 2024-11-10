@@ -8,8 +8,7 @@ from airflow.operators import (
     HdfsPutFileOperator,
     KaggleDownloadOperator,
 )
-from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
+from airflow.operators.python_operator import PythonOperator
 from helpers.year_months_helper import get_year_months
 
 
@@ -56,6 +55,10 @@ clear_output_dir = ClearDirectoryOperator(
     pattern="*",
     dag=dag,
 )
+
+# Set task dependencies
+create_local_import_dir >> clear_local_import_dir
+create_output_dir >> clear_output_dir
 
 # Download the Hubway dataset from Kaggle
 download_hubway_data = KaggleDownloadOperator(
@@ -112,3 +115,9 @@ clean_raw_data = SparkSubmitOperator(
     verbose=False,
     dag=dag,
 )
+
+# Set task dependencies
+clear_local_import_dir >> download_hubway_data
+download_hubway_data >> get_year_months_op
+create_hdfs_raw_data_dir >> upload_raw_data
+upload_raw_data >> clean_raw_data
