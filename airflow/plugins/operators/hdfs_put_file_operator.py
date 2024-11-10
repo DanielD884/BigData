@@ -53,6 +53,6 @@ class HdfsPutFileOperator(BaseOperator):
 
             self.log.info(f"{index}: Upload file '{local_file}' to HDFS '{remote_file}'.")
 
-            hh.put_file(local_file, remote_file)
+            hh.putFile(local_file, remote_file)
 
         self.log.info("HdfsPutFilesOperator done.")
