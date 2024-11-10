@@ -2,7 +2,7 @@ import ast
 from os import path
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
-from plugins.hooks.hdfs_hook import HdfsHook
+from hooks.hdfs_hook import HdfsHook
 
 class HdfsPutFileOperator(BaseOperator):
 

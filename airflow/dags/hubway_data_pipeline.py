@@ -5,7 +5,7 @@ from airflow.operators import (
     ClearDirectoryOperator,
     CreateDirectoryOperator,
     HdfsMkdirsFileOperator,
-    HdfsPutFilesOperator,
+    HdfsPutFileOperator,
     KaggleDownloadOperator,
 )
 from airflow.operators.bash import BashOperator
@@ -94,7 +94,7 @@ create_hdfs_final_data_dir = HdfsMkdirsFileOperator(
 get_year_months_op >> [create_hdfs_raw_data_dir, create_hdfs_final_data_dir]
 
 # Upload raw data to HDFS
-upload_raw_data = HdfsPutFilesOperator(
+upload_raw_data = HdfsPutFileOperator(
     task_id="upload-raw-data",
     local_path="/home/airflow/hubway_data/",
     remote_path="/user/hadoop/hubway_data/raw/",
