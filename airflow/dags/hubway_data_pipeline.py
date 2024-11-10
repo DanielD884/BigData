@@ -73,29 +73,29 @@ get_year_months_op = PythonOperator(
 )
 
 # Task to create HDFS directories for raw data
-create_hdfs_partition_raw = HdfsMkdirsFileOperator(
-    task_id="mkdirs-hdfs-raw",
-    directory="/user/hadoop/hubway_data/raw/",
-    file_names="{{ task_instance.xcom_pull(task_ids='get-year-months', key='year_months') }}",  # List of year-month directories
+create_hdfs_raw_data_dir = HdfsMkdirsFileOperator(
+    task_id="create_hdfs_raw_data_dir",
+    directory="/user/hadoop/hubway_data/raw_data/",
+    file_names="{{ task_instance.xcom_pull(task_ids='get-year-months', key='year_months') }}", 
     hdfs_conn_id="hdfs",
     dag=dag,
 )
 
 # Task to create HDFS directories for final data
-create_hdfs_partition_final = HdfsMkdirsFileOperator(
-    task_id="mkdirs-hdfs-final",
-    directory="/user/hadoop/hubway_data/final/",
-    file_names="{{ task_instance.xcom_pull(task_ids='get-year-months', key='year_months') }}",  # List of year-month directories
+create_hdfs_final_data_dir = HdfsMkdirsFileOperator(
+    task_id="create_hdfs_final_data_dir",
+    directory="/user/hadoop/hubway_data/final_data/",
+    file_names="{{ task_instance.xcom_pull(task_ids='get-year-months', key='year_months') }}",  
     hdfs_conn_id="hdfs",
     dag=dag,
 )
 
 # Set task dependencies
-get_year_months_op >> [create_hdfs_partition_raw, create_hdfs_partition_final]
+get_year_months_op >> [create_hdfs_raw_data_dir, create_hdfs_final_data_dir]
 
 # Upload raw data to HDFS
-load_raw_data = HdfsPutFilesOperator(
-    task_id="upload-raw-to-hdfs",
+upload_raw_data = HdfsPutFilesOperator(
+    task_id="upload-raw-data",
     local_path="/home/airflow/hubway_data/",
     remote_path="/user/hadoop/hubway_data/raw/",
     file_names=["{{ task_instance.xcom_pull(task_ids='get-year-months') }}"],
