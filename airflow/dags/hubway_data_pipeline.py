@@ -105,9 +105,17 @@ upload_raw_data = HdfsPutFileOperator(
 # Clean raw data with python script
 clean_raw_data = SparkSubmitOperator(
     task_id="clean_raw_data",
-    application="/home/airflow/python/clean_raw_data.py",
+    application="/home/airflow/airflow/python/clean_raw_data.py",
     name="clean_raw_data",
-    conn_id="spark_default",
+    conn_id="spark",
+    total_executor_cores='2',
+    executor_cores='2',
+    executor_memory='2g',
+    num_executors='2',
+    application_args=[
+        "--yearmonth",
+        "{{ task_instance.xcom_pull(task_ids='get-year-months') }}"
+    ],
     verbose=False,
     dag=dag,
 )

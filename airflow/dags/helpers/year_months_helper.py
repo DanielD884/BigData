@@ -1,12 +1,9 @@
-from pathlib import Path
-from typing import List
+import os
 
-def get_year_months(directory: str = "/home/airflow/hubway_data") -> List[str]:
-    path = Path(directory)
-    
-    if not path.exists():
-        raise FileNotFoundError(f"Directory {directory} does not exist.")
-    
-    year_months = sorted(file.name[:6] for file in path.iterdir() if file.is_file() and file.name[:6].isdigit())
-    
-    return year_months
+
+# Function to get the year month list
+def get_year_months():
+    files = [file for file in os.listdir("/home/airflow/hubway_data") if file[:6].isdigit()]
+
+    # To reduce the number of files being processed, add a slice to the list
+    return [file[:6] for file in files][:3]
