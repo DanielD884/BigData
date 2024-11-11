@@ -147,6 +147,24 @@ calculate_kpis = SparkSubmitOperator(
     dag=dag,
 )
 
+# Combine all KPIs for each year-month
+combine_kpis = SparkSubmitOperator(
+    task_id="combine-kpis",
+    application="/home/airflow/airflow/python/combine_kpis.py",
+    name="combine_kpis",
+    conn_id="spark",
+    total_executor_cores='4',
+    executor_cores='4',
+    executor_memory='4g',
+    num_executors='4',
+    application_args=[
+        "--yearmonth",
+        "{{ task_instance.xcom_pull(task_ids='get-year-months') }}"
+    ],
+    verbose=False,
+    dag=dag,
+)
+
 # Set task dependencies
 create_local_import_dir >> clear_local_import_dir
 create_output_dir >> clear_output_dir
@@ -157,3 +175,4 @@ create_hdfs_raw_data_dir >> upload_raw_data
 upload_raw_data >> clean_raw_data
 clean_raw_data >> create_hdfs_kpi 
 create_hdfs_kpi >> calculate_kpis
+calculate_kpis >> combine_kpis
