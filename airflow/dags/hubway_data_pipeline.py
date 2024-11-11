@@ -120,6 +120,33 @@ clean_raw_data = SparkSubmitOperator(
     dag=dag,
 )
 
+# Task to create HDFS directories for KPIs
+create_hdfs_kpi = HdfsMkdirsFileOperator(
+    task_id="create-hdfs-for-kpis",
+    directory="/user/hadoop/hubway_data/kpis/",
+    file_names=["{{ task_instance.xcom_pull(task_ids='get-year-months') }}"],
+    hdfs_conn_id="hdfs",
+    dag=dag,
+)
+
+# Calculate KPIs for each year-month
+calculate_kpis = SparkSubmitOperator(
+    task_id="calculate-kpis",
+    application="/home/airflow/airflow/python/calculate_kpis.py",
+    name="calculate_kpis",
+    conn_id="spark",
+    total_executor_cores='2',
+    executor_cores='2',
+    executor_memory='2g',
+    num_executors='2',
+    application_args=[
+        "--yearmonth",
+        "{{ task_instance.xcom_pull(task_ids='get-year-months') }}"
+    ],
+    verbose=False,
+    dag=dag,
+)
+
 # Set task dependencies
 create_local_import_dir >> clear_local_import_dir
 create_output_dir >> clear_output_dir
@@ -128,3 +155,5 @@ download_hubway_data >> get_year_months_op
 get_year_months_op >> [create_hdfs_raw_data_dir, create_hdfs_final_data_dir]
 create_hdfs_raw_data_dir >> upload_raw_data
 upload_raw_data >> clean_raw_data
+clean_raw_data >> create_hdfs_kpi 
+create_hdfs_kpi >> calculate_kpis
