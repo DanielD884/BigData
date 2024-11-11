@@ -153,10 +153,10 @@ combine_kpis = SparkSubmitOperator(
     application="/home/airflow/airflow/python/combine_kpis.py",
     name="combine_kpis",
     conn_id="spark",
-    total_executor_cores='4',
-    executor_cores='4',
-    executor_memory='4g',
-    num_executors='4',
+    total_executor_cores='2',
+    executor_cores='2',
+    executor_memory='2g',
+    num_executors='2',
     application_args=[
         "--yearmonth",
         "{{ task_instance.xcom_pull(task_ids='get-year-months') }}"
