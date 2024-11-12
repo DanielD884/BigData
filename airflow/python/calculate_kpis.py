@@ -84,7 +84,6 @@ def process_year_month(spark, year_month):
         "avg_trip_duration",
         "avg_trip_distance",
         "gender_share",
-        "age_share",
         "generation_share",
         "top_used_bikes",
         "top_start_stations",
@@ -103,7 +102,6 @@ def process_year_month(spark, year_month):
 
     avg_trip_duration, avg_trip_distance = calculate_average_kpis(df)
     gender_share = calculate_gender_share(df)
-    age_share = calculate_top_10(df, "age")
     generation_share = calculate_top_10(df, "generation")
     top_used_bikes = calculate_top_10(df, "bike_id")
     top_start_stations = calculate_top_10(df, "start_station_id")
@@ -117,7 +115,6 @@ def process_year_month(spark, year_month):
                 avg_trip_duration,
                 avg_trip_distance,
                 gender_share,
-                age_share,
                 generation_share,
                 top_used_bikes,
                 top_start_stations,
