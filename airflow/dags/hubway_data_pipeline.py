@@ -148,10 +148,10 @@ calculate_kpis = SparkSubmitOperator(
 )
 
 # Combine all KPIs for each year-month
-combine_kpis = SparkSubmitOperator(
-    task_id="combine-kpis",
-    application="/home/airflow/airflow/python/combine_kpis.py",
-    name="combine_kpis",
+create_excel = SparkSubmitOperator(
+    task_id="create_excel",
+    application="/home/airflow/airflow/python/create_excel.py",
+    name="create_excel",
     conn_id="spark",
     total_executor_cores='2',
     executor_cores='2',
@@ -175,4 +175,4 @@ create_hdfs_raw_data_dir >> upload_raw_data
 upload_raw_data >> clean_raw_data
 clean_raw_data >> create_hdfs_kpi 
 create_hdfs_kpi >> calculate_kpis
-calculate_kpis >> combine_kpis
+calculate_kpis >> create_excel

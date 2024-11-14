@@ -27,86 +27,229 @@ def calculate_average_kpis(df):
     )
 
 
-def calculate_gender_share(df):
+def calculate_gender_share(df, gender_type=None):
     gender_df: DataFrame = df.groupBy(col("gender")).count().collect()
-    
     gender_counts = {row['gender']: row['count'] for row in gender_df}
-    
+
     gender_count_na = gender_counts.get(0, 0)
     gender_count_m = gender_counts.get(1, 0)
     gender_count_f = gender_counts.get(2, 0)
-    
     gender_count = gender_count_na + gender_count_m + gender_count_f
-    
+
     if gender_count > 0:
         m = float(gender_count_m / gender_count * 100)
         w = float(gender_count_f / gender_count * 100)
         na = float(gender_count_na / gender_count * 100)
-        gender_share = str([("m", m), ("w", w), ("na", na)])
-    else:
-        gender_share = "[]"
+        
+        if gender_type == "m":
+            return m
+        elif gender_type == "w":
+            return w
+        elif gender_type == "na":
+            return na
+        else:
+            return 0.0
+   
+
+def calculate_top_n(df, column_name, rank, return_type="value"):
+    top_n = df.groupBy(column_name).count().orderBy(desc("count")).limit(rank).collect()
     
-    return gender_share
-
-
-def calculate_top_10(df, column_name):
-    return str(
-        [(value, count) for value, count in df.groupBy(column_name).count().orderBy(desc("count")).limit(10).collect()]
-    )
-
-
-def calculate_time_slots_share(df):
-    time_slots = [0, 1, 2, 3]
-    time_slot_counts = {}
-
-    for slot in time_slots:
-        try:
-            count = df.where(col(f"timeslot_{slot}") == 1).count()
-        except IndexError:
-            count = 0
-        time_slot_counts[slot] = count
-
-    total_count = sum(time_slot_counts.values())
-
-    if total_count > 0:
-        time_slots_share = [
-            (slot, count / total_count * 100) for slot, count in time_slot_counts.items()
-        ]
+    if len(top_n) >= rank:
+        value, count = top_n[rank - 1][column_name], top_n[rank - 1]["count"]
+        return value if return_type == "value" else count
     else:
-        time_slots_share = []
+        return None if return_type == "value" else 0
 
-    return str(time_slots_share)
 
+def calculate_time_slot_count(df, slot):
+    try:
+        count = df.where(col(f"timeslot_{slot}") == 1).count()
+    except IndexError:
+        count = 0
+    return count
+
+def calculate_generation_count(df, generation_value):
+    count = df.filter(col("generation") == generation_value).count()
+    return count
 
 def process_year_month(spark, year_month):
     row = Row(
         "year_month",
         "avg_trip_duration",
         "avg_trip_distance",
-        "gender_share",
-        "generation_share",
-        "top_used_bikes",
-        "top_start_stations",
-        "top_end_stations",
-        "time_slots",
+        "gender_share_m",
+        "gender_share_w",
+        "gender_share_na",
+        "silent_generation",
+        "generation_x",
+        "generation_y",
+        "generation_z",
+        "baby_boomer",
+        "generation_alpha",
+        "no_generation_data",
+        "top_used_bikes_1_value",
+        "top_used_bikes_1_count",
+        "top_used_bikes_2_value",
+        "top_used_bikes_2_count",
+        "top_used_bikes_3_value",
+        "top_used_bikes_3_count",
+        "top_used_bikes_4_value",
+        "top_used_bikes_4_count",
+        "top_used_bikes_5_value",
+        "top_used_bikes_5_count",
+        "top_used_bikes_6_value",
+        "top_used_bikes_6_count",
+        "top_used_bikes_7_value",
+        "top_used_bikes_7_count",
+        "top_used_bikes_8_value",
+        "top_used_bikes_8_count",
+        "top_used_bikes_9_value",
+        "top_used_bikes_9_count",
+        "top_used_bikes_10_value",
+        "top_used_bikes_10_count",
+        "top_start_stations_1_value",
+        "top_start_stations_1_count",
+        "top_start_stations_2_value",
+        "top_start_stations_2_count",
+        "top_start_stations_3_value",
+        "top_start_stations_3_count",
+        "top_start_stations_4_value",
+        "top_start_stations_4_count",
+        "top_start_stations_5_value",
+        "top_start_stations_5_count",
+        "top_start_stations_6_value",
+        "top_start_stations_6_count",
+        "top_start_stations_7_value",
+        "top_start_stations_7_count",
+        "top_start_stations_8_value",
+        "top_start_stations_8_count",
+        "top_start_stations_9_value",
+        "top_start_stations_9_count",
+        "top_start_stations_10_value",
+        "top_start_stations_10_count",
+        "top_end_stations_1_value",
+        "top_end_stations_1_count",
+        "top_end_stations_2_value",
+        "top_end_stations_2_count",
+        "top_end_stations_3_value",
+        "top_end_stations_3_count",
+        "top_end_stations_4_value",
+        "top_end_stations_4_count",
+        "top_end_stations_5_value",
+        "top_end_stations_5_count",
+        "top_end_stations_6_value",
+        "top_end_stations_6_count",
+        "top_end_stations_7_value",
+        "top_end_stations_7_count",
+        "top_end_stations_8_value",
+        "top_end_stations_8_count",
+        "top_end_stations_9_value",
+        "top_end_stations_9_count",
+        "top_end_stations_10_value",
+        "top_end_stations_10_count",
+        "time_slots_0",
+        "time_slots_1",
+        "time_slots_2",
+        "time_slots_3"
     )
 
-    final_file = path.join("/user/hadoop/hubway_data/final", year_month, "hubway-tripdata.parquet")
+    cleaned_file = path.join("/user/hadoop/hubway_data/final", year_month, "hubway-tripdata.parquet")
     kpi_file = path.join("/user/hadoop/hubway_data/kpis", year_month, "kpis.parquet")
 
     df = (
         spark.read.format("parquet")
         .options(header="true", delimiter=",", nullValue="null", inferschema="true")
-        .load(final_file)
+        .load(cleaned_file)
     )
 
     avg_trip_duration, avg_trip_distance = calculate_average_kpis(df)
-    gender_share = calculate_gender_share(df)
-    generation_share = calculate_top_10(df, "generation")
-    top_used_bikes = calculate_top_10(df, "bike_id")
-    top_start_stations = calculate_top_10(df, "start_station_id")
-    top_end_stations = calculate_top_10(df, "end_station_id")
-    time_slots = calculate_time_slots_share(df)
+
+    # Calculate gender share
+    gender_share_m = calculate_gender_share(df,"m")
+    gender_share_w = calculate_gender_share(df,"w")
+    gender_share_na = calculate_gender_share(df,"na")
+
+    # Calculate top 10 used bikes
+    top_used_bikes_1_value = calculate_top_n(df, "bike_id", 1, "value")
+    top_used_bikes_1_count = calculate_top_n(df, "bike_id", 1, "count")
+    top_used_bikes_2_value = calculate_top_n(df, "bike_id", 2, "value")
+    top_used_bikes_2_count = calculate_top_n(df, "bike_id", 2, "count")
+    top_used_bikes_3_value = calculate_top_n(df, "bike_id", 3, "value")
+    top_used_bikes_3_count = calculate_top_n(df, "bike_id", 3, "count")
+    top_used_bikes_4_value = calculate_top_n(df, "bike_id", 4, "value")
+    top_used_bikes_4_count = calculate_top_n(df, "bike_id", 4, "count")
+    top_used_bikes_5_value = calculate_top_n(df, "bike_id", 5, "value")
+    top_used_bikes_5_count = calculate_top_n(df, "bike_id", 5, "count")
+    top_used_bikes_6_value = calculate_top_n(df, "bike_id", 6, "value")
+    top_used_bikes_6_count = calculate_top_n(df, "bike_id", 6, "count")
+    top_used_bikes_7_value = calculate_top_n(df, "bike_id", 7, "value")
+    top_used_bikes_7_count = calculate_top_n(df, "bike_id", 7, "count")
+    top_used_bikes_8_value = calculate_top_n(df, "bike_id", 8, "value")
+    top_used_bikes_8_count = calculate_top_n(df, "bike_id", 8, "count")
+    top_used_bikes_9_value = calculate_top_n(df, "bike_id", 9, "value")
+    top_used_bikes_9_count = calculate_top_n(df, "bike_id", 9, "count")
+    top_used_bikes_10_value = calculate_top_n(df, "bike_id", 10, "value")
+    top_used_bikes_10_count = calculate_top_n(df, "bike_id", 10, "count")
+
+    # Calculate Top 10 Bike Stations
+    top_start_stations_1_value = calculate_top_n(df, "start_station_name", 1, "value")
+    top_start_stations_1_count = calculate_top_n(df, "start_station_name", 1, "count")
+    top_start_stations_2_value = calculate_top_n(df, "start_station_name", 2, "value")
+    top_start_stations_2_count = calculate_top_n(df, "start_station_name", 2, "count")
+    top_start_stations_3_value = calculate_top_n(df, "start_station_name", 3, "value")
+    top_start_stations_3_count = calculate_top_n(df, "start_station_name", 3, "count")
+    top_start_stations_4_value = calculate_top_n(df, "start_station_name", 4, "value")
+    top_start_stations_4_count = calculate_top_n(df, "start_station_name", 4, "count")
+    top_start_stations_5_value = calculate_top_n(df, "start_station_name", 5, "value")
+    top_start_stations_5_count = calculate_top_n(df, "start_station_name", 5, "count")
+    top_start_stations_6_value = calculate_top_n(df, "start_station_name", 6, "value")
+    top_start_stations_6_count = calculate_top_n(df, "start_station_name", 6, "count")
+    top_start_stations_7_value = calculate_top_n(df, "start_station_name", 7, "value")
+    top_start_stations_7_count = calculate_top_n(df, "start_station_name", 7, "count")
+    top_start_stations_8_value = calculate_top_n(df, "start_station_name", 8, "value")
+    top_start_stations_8_count = calculate_top_n(df, "start_station_name", 8, "count")
+    top_start_stations_9_value = calculate_top_n(df, "start_station_name", 9, "value")
+    top_start_stations_9_count = calculate_top_n(df, "start_station_name", 9, "count")
+    top_start_stations_10_value = calculate_top_n(df, "start_station_name", 10, "value")
+    top_start_stations_10_count = calculate_top_n(df, "start_station_name", 10, "count")
+
+    # Calculate Top 10 End Bike Stations
+    top_end_stations_1_value = calculate_top_n(df, "end_station_name", 1, "value")
+    top_end_stations_1_count = calculate_top_n(df, "end_station_name", 1, "count")
+    top_end_stations_2_value = calculate_top_n(df, "end_station_name", 2, "value")
+    top_end_stations_2_count = calculate_top_n(df, "end_station_name", 2, "count")
+    top_end_stations_3_value = calculate_top_n(df, "end_station_name", 3, "value")
+    top_end_stations_3_count = calculate_top_n(df, "end_station_name", 3, "count")
+    top_end_stations_4_value = calculate_top_n(df, "end_station_name", 4, "value")
+    top_end_stations_4_count = calculate_top_n(df, "end_station_name", 4, "count")
+    top_end_stations_5_value = calculate_top_n(df, "end_station_name", 5, "value")
+    top_end_stations_5_count = calculate_top_n(df, "end_station_name", 5, "count")
+    top_end_stations_6_value = calculate_top_n(df, "end_station_name", 6, "value")
+    top_end_stations_6_count = calculate_top_n(df, "end_station_name", 6, "count")
+    top_end_stations_7_value = calculate_top_n(df, "end_station_name", 7, "value")
+    top_end_stations_7_count = calculate_top_n(df, "end_station_name", 7, "count")
+    top_end_stations_8_value = calculate_top_n(df, "end_station_name", 8, "value")
+    top_end_stations_8_count = calculate_top_n(df, "end_station_name", 8, "count")
+    top_end_stations_9_value = calculate_top_n(df, "end_station_name", 9, "value")
+    top_end_stations_9_count = calculate_top_n(df, "end_station_name", 9, "count")
+    top_end_stations_10_value = calculate_top_n(df, "end_station_name", 10, "value")
+    top_end_stations_10_count = calculate_top_n(df, "end_station_name", 10, "count")
+    
+    # Calculate Time Slots
+    time_slot_0_count = calculate_time_slot_count(df, 0)
+    time_slot_1_count = calculate_time_slot_count(df, 1)
+    time_slot_2_count = calculate_time_slot_count(df, 2)
+    time_slot_3_count = calculate_time_slot_count(df, 3)
+
+    # Calculate Generation
+    silent_generation = calculate_generation_count(df, 0)
+    baby_boomer = calculate_generation_count(df, 1)
+    generation_x = calculate_generation_count(df, 2)
+    generation_y = calculate_generation_count(df, 3)
+    generation_z = calculate_generation_count(df, 4)
+    generation_alpha = calculate_generation_count(df, 5)
+    no_generation_data = calculate_generation_count(df, -1)
+
 
     kpis_df = spark.createDataFrame(
         [
@@ -114,12 +257,81 @@ def process_year_month(spark, year_month):
                 year_month,
                 avg_trip_duration,
                 avg_trip_distance,
-                gender_share,
-                generation_share,
-                top_used_bikes,
-                top_start_stations,
-                top_end_stations,
-                time_slots,
+                gender_share_m,
+                gender_share_w,
+                gender_share_na,
+                top_used_bikes_1_value,
+                top_used_bikes_1_count,
+                top_used_bikes_2_value,
+                top_used_bikes_2_count,
+                top_used_bikes_3_value,
+                top_used_bikes_3_count,
+                top_used_bikes_4_value,
+                top_used_bikes_4_count,
+                top_used_bikes_5_value,
+                top_used_bikes_5_count,
+                top_used_bikes_6_value,
+                top_used_bikes_6_count,
+                top_used_bikes_7_value,
+                top_used_bikes_7_count,
+                top_used_bikes_8_value,
+                top_used_bikes_8_count,
+                top_used_bikes_9_value,
+                top_used_bikes_9_count,
+                top_used_bikes_10_value,
+                top_used_bikes_10_count,
+                top_start_stations_1_value,
+                top_start_stations_1_count,
+                top_start_stations_2_value,
+                top_start_stations_2_count,
+                top_start_stations_3_value,
+                top_start_stations_3_count,
+                top_start_stations_4_value,
+                top_start_stations_4_count,
+                top_start_stations_5_value,
+                top_start_stations_5_count,
+                top_start_stations_6_value,
+                top_start_stations_6_count,
+                top_start_stations_7_value,
+                top_start_stations_7_count,
+                top_start_stations_8_value,
+                top_start_stations_8_count,
+                top_start_stations_9_value,
+                top_start_stations_9_count,
+                top_start_stations_10_value,
+                top_start_stations_10_count,
+                top_end_stations_1_value,
+                top_end_stations_1_count,
+                top_end_stations_2_value,
+                top_end_stations_2_count,
+                top_end_stations_3_value,
+                top_end_stations_3_count,
+                top_end_stations_4_value,
+                top_end_stations_4_count,
+                top_end_stations_5_value,
+                top_end_stations_5_count,
+                top_end_stations_6_value,
+                top_end_stations_6_count,
+                top_end_stations_7_value,
+                top_end_stations_7_count,
+                top_end_stations_8_value,
+                top_end_stations_8_count,
+                top_end_stations_9_value,
+                top_end_stations_9_count,
+                top_end_stations_10_value,
+                top_end_stations_10_count,
+                time_slot_0_count,
+                time_slot_1_count,
+                time_slot_2_count,
+                time_slot_3_count,
+                silent_generation,
+                generation_x,
+                generation_y,
+                generation_z,
+                baby_boomer,
+                generation_alpha,
+                no_generation_data
+
             )
         ]
     )

@@ -197,7 +197,6 @@ if __name__ == "__main__":
             "end_station_latitude",
             "end_station_longitude"
         )
-        print(df.collect()[:5])
 
         # Write data to HDFS
         df.write.format("parquet").mode("overwrite").options(
