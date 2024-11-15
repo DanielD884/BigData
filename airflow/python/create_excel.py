@@ -5,7 +5,7 @@ from os import path
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from openpyxl.chart import PieChart, Reference
+from openpyxl.chart import PieChart, Reference, BarChart
 from openpyxl.chart.label import DataLabelList
 import pyspark
 from pyspark.sql import DataFrame, SparkSession
@@ -303,73 +303,63 @@ if __name__ == "__main__":
                 cell.border = thick_border
 
 
-        pie = PieChart()
 
-        # Korrekte Zuweisung der Referenzen für Labels und Werte
-        labels_ref = Reference(sheet, min_col=4, min_row=1, max_col=6, max_row=1)  # D1:F1 für die Labels
-        values_ref = Reference(sheet, min_col=4, min_row=2, max_col=6, max_row=2)  # D2:F2 für die Werte
+        # Erstes Säulendiagramm
+        bar_chart1 = BarChart()
 
-        # Daten und Beschriftungen dem Diagramm hinzufügen
-        pie.add_data(values_ref, titles_from_data=False)
-        pie.set_categories(labels_ref)
-        pie.title = "Usage Share by Gender"
+        # Referenzen für Labels und Werte
+        labels_ref = Reference(sheet, min_col=4, min_row=1, max_col=6, max_row=1)  # D1:F1 für Labels
+        values_ref = Reference(sheet, min_col=4, min_row=2, max_col=6, max_row=2)  # D2:F2 für Werte
 
-        pie.dataLabels = DataLabelList()  # Datenbeschriftungen hinzufügen
-        pie.dataLabels.showPercent = True 
+        # Daten und Kategorien hinzufügen
+        bar_chart1.add_data(values_ref, titles_from_data=False)
+        bar_chart1.set_categories(labels_ref)
+        bar_chart1.title = "Usage Share by Gender"
 
-        # Größe des Tortendiagramms einstellen
-        pie.width = 10
-        pie.height = 12
+        # Diagrammgröße einstellen
+        bar_chart1.width = 10
+        bar_chart1.height = 12
 
-        # Füge das Tortendiagramm in das Tabellenblatt ein
-        sheet.add_chart(pie, "E38")
+        # Diagramm in das Tabellenblatt einfügen
+        sheet.add_chart(bar_chart1, "E38")
 
-        # Erstellen eines zweiten Tortendiagramms
-        pie2 = PieChart()
+        # Zweites Säulendiagramm
+        bar_chart2 = BarChart()
 
-        # Referenzen für die Labels und Werte für das zweite Diagramm
+        # Referenzen für Labels und Werte
         labels_ref2 = Reference(sheet, min_col=7, min_row=1, max_col=13, max_row=1)  # G1:M1 für Labels
         values_ref2 = Reference(sheet, min_col=7, min_row=2, max_col=13, max_row=2)  # G2:M2 für Werte
 
-        # Daten und Beschriftungen dem Diagramm hinzufügen
-        pie2.add_data(values_ref2, titles_from_data=False)
-        pie2.set_categories(labels_ref2)
-        pie2.title = "Usage Share by age"
+        # Daten und Kategorien hinzufügen
+        bar_chart2.add_data(values_ref2, titles_from_data=False)
+        bar_chart2.set_categories(labels_ref2)
+        bar_chart2.title = "Usage Share by Age"
 
-        pie2.dataLabels = DataLabelList()  # Datenbeschriftungen hinzufügen
-        pie2.dataLabels.showPercent = True  # Prozentzahlen anzeigen
-        
+        # Diagrammgröße einstellen
+        bar_chart2.width = 10
+        bar_chart2.height = 12
 
-        # Größe des Tortendiagramms einstellen
-        pie2.width = 10
-        pie2.height = 12
+        # Diagramm in das Tabellenblatt einfügen
+        sheet.add_chart(bar_chart2, "N38")
 
-        # Füge das Tortendiagramm in das Tabellenblatt ein
-        sheet.add_chart(pie2, "N38")
+        # Drittes Säulendiagramm
+        bar_chart3 = BarChart()
 
-        # Erstellen eines neuen Tortendiagramms
-        pie_bv_by = PieChart()
-
-        # Referenzen für Labels (BV1:BY1) und Werte (BV2:BY2)
+        # Referenzen für Labels und Werte
         labels_ref_bv_by = Reference(sheet, min_col=74, min_row=1, max_col=77, max_row=1)  # BV1:BY1 für Labels
         values_ref_bv_by = Reference(sheet, min_col=74, min_row=2, max_col=77, max_row=2)  # BV2:BY2 für Werte
 
-        # Daten und Beschriftungen hinzufügen
-        pie_bv_by.add_data(values_ref_bv_by, titles_from_data=False)
-        pie_bv_by.set_categories(labels_ref_bv_by)
-        pie_bv_by.title = "Sample Pie Chart for BV to BY"
-
-        # Datenbeschriftungen aktivieren
-        pie_bv_by.dataLabels = DataLabelList()
-        pie_bv_by.dataLabels.showPercent = True  # Prozentwerte anzeigen
-        pie_bv_by.dataLabels.showCatName = True  # Kategorienamen anzeigen
+        # Daten und Kategorien hinzufügen
+        bar_chart3.add_data(values_ref_bv_by, titles_from_data=False)
+        bar_chart3.set_categories(labels_ref_bv_by)
+        bar_chart3.title = "Sample Bar Chart for BV to BY"
 
         # Diagrammgröße einstellen
-        pie_bv_by.width = 10
-        pie_bv_by.height = 12
+        bar_chart3.width = 10
+        bar_chart3.height = 12
 
         # Diagramm in das Tabellenblatt einfügen
-        sheet.add_chart(pie_bv_by, "H50")
+        sheet.add_chart(bar_chart3, "H50")
 
 
     # Speichern der formatieren Excel-Datei
