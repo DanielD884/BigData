@@ -61,16 +61,20 @@ def calculate_top_n(df, column_name, rank, return_type="value"):
         return None if return_type == "value" else 0
 
 
-def calculate_time_slot_count(df, slot):
+def calculate_time_slot_percentage(df, slot):
     try:
-        count = df.where(col(f"timeslot_{slot}") == 1).count()
+        total_count = df.count() 
+        slot_count = df.where(col(f"timeslot_{slot}") == 1).count()
+        percentage = (slot_count / total_count) * 100 if total_count > 0 else 0
     except IndexError:
-        count = 0
-    return count
+        percentage = 0
+    return round(percentage, 2)
 
-def calculate_generation_count(df, generation_value):
-    count = df.filter(col("generation") == generation_value).count()
-    return count
+def calculate_generation_percentage(df, generation_value):
+    total_count = df.count()  
+    generation_count = df.filter(col("generation") == generation_value).count()
+    percentage = (generation_count / total_count) * 100 if total_count > 0 else 0
+    return round(percentage, 2)
 
 def process_year_month(spark, year_month):
     row = Row(
@@ -236,19 +240,19 @@ def process_year_month(spark, year_month):
     top_end_stations_10_count = calculate_top_n(df, "end_station_name", 10, "count")
     
     # Calculate Time Slots
-    time_slots_0 = calculate_time_slot_count(df, 0)
-    time_slots_1 = calculate_time_slot_count(df, 1)
-    time_slots_2 = calculate_time_slot_count(df, 2)
-    time_slots_3 = calculate_time_slot_count(df, 3)
+    time_slots_0 = calculate_time_slot_percentage(df, 0)
+    time_slots_1 = calculate_time_slot_percentage(df, 1)
+    time_slots_2 = calculate_time_slot_percentage(df, 2)
+    time_slots_3 = calculate_time_slot_percentage(df, 3)
 
     # Calculate Generation
-    silent_generation = calculate_generation_count(df, 0)
-    baby_boomer = calculate_generation_count(df, 1)
-    generation_x = calculate_generation_count(df, 2)
-    generation_y = calculate_generation_count(df, 3)
-    generation_z = calculate_generation_count(df, 4)
-    generation_alpha = calculate_generation_count(df, 5)
-    no_generation_data = calculate_generation_count(df, -1)
+    silent_generation = calculate_generation_percentage(df, 0)
+    baby_boomer = calculate_generation_percentage(df, 1)
+    generation_x = calculate_generation_percentage(df, 2)
+    generation_y = calculate_generation_percentage(df, 3)
+    generation_z = calculate_generation_percentage(df, 4)
+    generation_alpha = calculate_generation_percentage(df, 5)
+    no_generation_data = calculate_generation_percentage(df, -1)
 
 
     kpis_df = spark.createDataFrame(
