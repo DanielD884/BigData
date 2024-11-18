@@ -76,6 +76,10 @@ def calculate_generation_percentage(df, generation_value):
     percentage = (generation_count / total_count) * 100 if total_count > 0 else 0
     return round(percentage, 2)
 
+def format_year_month(year_month):
+    return f"{year_month[4:6]}.{year_month[:4]}"
+
+
 def process_year_month(spark, year_month):
     row = Row(
       "year_month",
@@ -253,6 +257,9 @@ def process_year_month(spark, year_month):
     generation_z = calculate_generation_percentage(df, 4)
     generation_alpha = calculate_generation_percentage(df, 5)
     no_generation_data = calculate_generation_percentage(df, -1)
+
+    # Change Layout year_month
+    year_month = format_year_month(year_month)
 
 
     kpis_df = spark.createDataFrame(

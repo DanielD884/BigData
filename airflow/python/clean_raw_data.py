@@ -103,8 +103,6 @@ if __name__ == "__main__":
     args = get_args()
     year_months = ast.literal_eval(args.yearmonth)
 
-    print(year_months)
-
     # Initialize Spark Context
     sc = pyspark.SparkContext()
     spark = SparkSession(sc)

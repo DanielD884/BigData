@@ -51,7 +51,7 @@ if __name__ == "__main__":
                 # Convert the Spark DataFrame to Pandas DataFrame and write to a specific sheet
                 df.toPandas().to_excel(writer, sheet_name=year_month, index=False, header=True)
     
-   # Lade die Excel-Datei mit openpyxl für das Layout und die Formatierung
+   # load the workbook
     workbook = load_workbook("/home/airflow/output/combined-kpis.xlsx")
     
     for year_month in year_months:
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
         # Remove all existing borders in the range D5 to Y62
         for row in range(5, 63):
-            for col in range(4, 26):  # D is the 4th column, Y is the 25th column
+            for col in range(4, 29):  
                 cell = sheet.cell(row=row, column=col)
                 cell.border = Border()
 
@@ -77,9 +77,9 @@ if __name__ == "__main__":
             # Left border
             sheet.cell(row=row, column=4).border = Border(left=thick_border.left)
             # Right border
-            sheet.cell(row=row, column=25).border = Border(right=thick_border.right)
+            sheet.cell(row=row, column=29).border = Border(right=thick_border.right)
 
-        for col in range(4, 26):
+        for col in range(4, 29):
             # Top border
             sheet.cell(row=5, column=col).border = Border(top=thick_border.top)
             # Bottom border
@@ -89,108 +89,98 @@ if __name__ == "__main__":
         sheet.cell(row=5, column=4).border = Border(top=thick_border.top, left=thick_border.left)
         sheet.cell(row=5, column=25).border = Border(top=thick_border.top, right=thick_border.right)
         sheet.cell(row=62, column=4).border = Border(bottom=thick_border.bottom, left=thick_border.left)
-        sheet.cell(row=62, column=25).border = Border(bottom=thick_border.bottom, right=thick_border.right)
+        sheet.cell(row=62, column=29).border = Border(bottom=thick_border.bottom, right=thick_border.right)
 
         # Set the text "hubway-data" in a merged cell
-        sheet.merge_cells('D5:Y6')
+        sheet.merge_cells('D5:AB6')
         cell = sheet.cell(row=5, column=4)
-        cell.value = "hubway-data"
+        cell.value = "Hubway Data Dashboard"
         cell.font = Font(color="FFFFFF")  # White font
         cell.fill = PatternFill(start_color="808080", end_color="808080", fill_type="solid")  # Gray background
         cell.alignment = Alignment(horizontal="center", vertical="center")  # Center alignment
 
-        # Merge cells E8 to H13 and set the text "February"
+        # Merge cells E8 to H13 and set the month and year
         sheet.merge_cells('E8:H13')
         cell = sheet.cell(row=8, column=5)
         cell.value = sheet["A2"].value  
         cell.font = Font(color="000000")  # Black font
         cell.alignment = Alignment(horizontal="center", vertical="center")  # Center alignment
 
-        # Apply thick border around the "February" box
+        # Apply thick border 
         for row in range(8, 14):
-            # Left border
             sheet.cell(row=row, column=5).border = Border(left=thick_border.left)
-            # Right border
             sheet.cell(row=row, column=8).border = Border(right=thick_border.right)
 
         for col in range(5, 9):
-            # Top border
             sheet.cell(row=8, column=col).border = Border(top=thick_border.top)
-            # Bottom border
             sheet.cell(row=13, column=col).border = Border(bottom=thick_border.bottom)
 
-        # Set the corners for the "February" box
+        # Set the corners 
         sheet.cell(row=8, column=5).border = Border(top=thick_border.top, left=thick_border.left)
         sheet.cell(row=8, column=8).border = Border(top=thick_border.top, right=thick_border.right)
         sheet.cell(row=13, column=5).border = Border(bottom=thick_border.bottom, left=thick_border.left)
         sheet.cell(row=13, column=8).border = Border(bottom=thick_border.bottom, right=thick_border.right)
 
-        # Add the "Average Trip Duration" header
+        # Styleelements
+        header_font = Font(name="Calibri", size=14, bold=True)
+        value_font = Font(name="Calibri", size=12)
+        header_fill = PatternFill(start_color="BCE4F7", end_color="BCE4F7", fill_type="solid")
+        value_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+        thick_border = Border(
+            left=Side(style="thick"),
+            right=Side(style="thick"),
+            top=Side(style="thick"),
+            bottom=Side(style="thick"),
+        )
+
+        # **"Average Trip Duration" Box**
         sheet.merge_cells('E15:H18')
-        cell = sheet.cell(row=15, column=5, value="Average Trip Duration")
-        cell.font = Font(bold=True)
-        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-
-        # Apply thick border around the "Average Trip Duration" box
+        header_cell = sheet.cell(row=15, column=5, value="Average Trip Duration in Minutes")
+        header_cell.font = header_font
+        header_cell.alignment = Alignment(horizontal="center", vertical="center")
         for row in range(15, 19):
-            # Left border
-            sheet.cell(row=row, column=5).border = Border(left=thick_border.left)
-            # Right border
-            sheet.cell(row=row, column=8).border = Border(right=thick_border.right)
+            for col in range(5, 9):
+                sheet.cell(row=row, column=col).fill = header_fill
+                if row == 15 or row == 18 or col == 5 or col == 8:
+                    sheet.cell(row=row, column=col).border = thick_border
 
-        for col in range(5, 9):
-            # Top border
-            sheet.cell(row=15, column=col).border = Border(top=thick_border.top)
-            # Bottom border
-            sheet.cell(row=18, column=col).border = Border(bottom=thick_border.bottom)
-
-        # Set the corners for the "Average Trip Duration" box
-        sheet.cell(row=15, column=5).border = Border(top=thick_border.top, left=thick_border.left)
-        sheet.cell(row=15, column=8).border = Border(top=thick_border.top, right=thick_border.right)
-        sheet.cell(row=18, column=5).border = Border(bottom=thick_border.bottom, left=thick_border.left)
-        sheet.cell(row=18, column=8).border = Border(bottom=thick_border.bottom, right=thick_border.right)
-
-        # Add sample data for average trip duration
-        average_trip_duration = sheet["B2"].value  
+        average_trip_duration = sheet["B2"].value  # Beispiel: Wert aus Zelle B2
         sheet.merge_cells('E19:H24')
-        cell = sheet.cell(row=19, column=5, value=average_trip_duration)
-        cell.alignment = Alignment(horizontal="center", vertical="center")
+        value_cell = sheet.cell(row=19, column=5, value=average_trip_duration)
+        value_cell.font = value_font
+        value_cell.alignment = Alignment(horizontal="center", vertical="center")
+        for row in range(19, 25):
+            for col in range(5, 9):
+                sheet.cell(row=row, column=col).fill = value_fill
+                if row == 19 or row == 24 or col == 5 or col == 8:
+                    sheet.cell(row=row, column=col).border = thick_border
 
-        # Add the "Average Distance" header
+        # **"Average Distance" Box**
         sheet.merge_cells('E26:H29')
-        cell = sheet.cell(row=26, column=5, value="Average Distance")
-        cell.font = Font(bold=True)
-        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-
-        # Apply thick border around the "Average Distance" box
+        header_cell = sheet.cell(row=26, column=5, value="Average Distance in Kilometers")
+        header_cell.font = header_font
+        header_cell.alignment = Alignment(horizontal="center", vertical="center")
         for row in range(26, 30):
-            # Left border
-            sheet.cell(row=row, column=5).border = Border(left=thick_border.left)
-            # Right border
-            sheet.cell(row=row, column=8).border = Border(right=thick_border.right)
+            for col in range(5, 9):
+                sheet.cell(row=row, column=col).fill = header_fill
+                if row == 26 or row == 29 or col == 5 or col == 8:
+                    sheet.cell(row=row, column=col).border = thick_border
 
-        for col in range(5, 9):
-            # Top border
-            sheet.cell(row=26, column=col).border = Border(top=thick_border.top)
-            # Bottom border
-            sheet.cell(row=29, column=col).border = Border(bottom=thick_border.bottom)
-
-        # Set the corners for the "Average Distance" box
-        sheet.cell(row=26, column=5).border = Border(top=thick_border.top, left=thick_border.left)
-        sheet.cell(row=26, column=8).border = Border(top=thick_border.top, right=thick_border.right)
-        sheet.cell(row=29, column=5).border = Border(bottom=thick_border.bottom, left=thick_border.left)
-        sheet.cell(row=29, column=8).border = Border(bottom=thick_border.bottom, right=thick_border.right)
-
-        # Add data for average distance
-        average_distance = sheet["C2"].value
+        average_distance = sheet["C2"].value  
         sheet.merge_cells('E30:H35')
-        cell = sheet.cell(row=30, column=5, value=average_distance)
-        cell.alignment = Alignment(horizontal="center", vertical="center")
+        value_cell = sheet.cell(row=30, column=5, value=average_distance)
+        value_cell.font = value_font
+        value_cell.alignment = Alignment(horizontal="center", vertical="center")
+        for row in range(30, 36):
+            for col in range(5, 9):
+                sheet.cell(row=row, column=col).fill = value_fill
+                if row == 30 or row == 35 or col == 5 or col == 8:
+                    sheet.cell(row=row, column=col).border = thick_border
 
 
-        # Add the first table from K15 to N37 with columns "Bike ID" and "Anzahl Nutzung"
+        # Add the first table from K15 to N37 with columns "Bike ID" and "Number of Usage"
         sheet.merge_cells('K11:N12')
-        cell = sheet.cell(row=11, column=11, value="Bike ID and Anzahl Nutzung")
+        cell = sheet.cell(row=11, column=11, value="Bike ID and Number of Usage")
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
@@ -199,18 +189,16 @@ if __name__ == "__main__":
         cell = sheet.cell(row=15, column=11, value="Bike ID")
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-        cell = sheet.cell(row=15, column=13, value="Anzahl Nutzung")
+        cell = sheet.cell(row=15, column=13, value="Number of Usage")
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-        # Fill the first table (Bike ID and Anzahl Nutzung) with "Platz" from N2 to Z2
+        # Fill the first table from N2 to Z2 with data about the top 10 bikes
         for i in range(10):
-            # Platz-Spalte
-            platz_cell = sheet.cell(row=17 + 2 * i, column=10, value=f"Platz {i + 1}")
+            platz_cell = sheet.cell(row=17 + 2 * i, column=10, value=f"No. {i + 1}")
             platz_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             sheet.merge_cells(start_row=17 + 2 * i, start_column=10, end_row=18 + 2 * i, end_column=10)
 
-            # Bike ID and Anzahl Nutzung
             bike_id = sheet.cell(row=2, column=14 + 2 * i).value
             usage_count = sheet.cell(row=2, column=15 + 2 * i).value
             row_start = 17 + 2 * i
@@ -226,9 +214,9 @@ if __name__ == "__main__":
                 cell = sheet.cell(row=row, column=col)
                 cell.border = thick_border
 
-        # Add the second table from Q15 to T37 with columns "Top 10 most start stations" and "Anzahl Nutzung"
+        # Add the second table from Q15 to T37 with columns "Top 10 most start stations" and "Number of Usage"
         sheet.merge_cells('Q11:T12')
-        cell = sheet.cell(row=11, column=17, value="Top 10 most start stations and Anzahl Nutzung")
+        cell = sheet.cell(row=11, column=17, value="Top 10 most start stations and Number of Usage")
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
@@ -237,18 +225,16 @@ if __name__ == "__main__":
         cell = sheet.cell(row=15, column=17, value="Top 10 most start stations")
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-        cell = sheet.cell(row=15, column=19, value="Anzahl Nutzung")
+        cell = sheet.cell(row=15, column=19, value="Number of Usage")
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-        # Fill the second table with "Platz" from AH2 to BA2
+        # Fill the second table with the data
         for i in range(10):
-            # Platz-Spalte
             platz_cell = sheet.cell(row=17 + 2 * i, column=16, value=f"Platz {i + 1}")
             platz_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             sheet.merge_cells(start_row=17 + 2 * i, start_column=16, end_row=18 + 2 * i, end_column=16)
 
-            # Start Station and Anzahl Nutzung
             start_station = sheet.cell(row=2, column=34 + 2 * i).value
             usage_count = sheet.cell(row=2, column=35 + 2 * i).value
             row_start = 17 + 2 * i
@@ -258,15 +244,14 @@ if __name__ == "__main__":
             sheet.cell(row=row_start, column=17, value=start_station).alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             sheet.cell(row=row_start, column=19, value=usage_count).alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-        # Apply thick border around the second table
         for row in range(17, 37):
             for col in range(16, 21):
                 cell = sheet.cell(row=row, column=col)
                 cell.border = thick_border
 
-        # Add the third table from W15 to Z37 with columns "Top 10 most end stations" and "Anzahl Nutzung"
+        # Add the third table from W15 to Z37 with columns "Top 10 most end stations" and "Number of Usage"
         sheet.merge_cells('W11:Z12')
-        cell = sheet.cell(row=11, column=23, value="Top 10 most end stations and Anzahl Nutzung")
+        cell = sheet.cell(row=11, column=23, value="Top 10 most end stations and Number of Usage")
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
@@ -275,18 +260,16 @@ if __name__ == "__main__":
         cell = sheet.cell(row=15, column=23, value="Top 10 most end stations")
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-        cell = sheet.cell(row=15, column=25, value="Anzahl Nutzung")
+        cell = sheet.cell(row=15, column=25, value="Number of Usage")
         cell.font = Font(bold=True)
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-        # Fill the third table from BB2 to BU2
+        # Fill the third table with data
         for i in range(10):
-            # Platz-Spalte
-            platz_cell = sheet.cell(row=17 + 2 * i, column=22, value=f"Platz {i + 1}")
+            platz_cell = sheet.cell(row=17 + 2 * i, column=22, value=f"No. {i + 1}")
             platz_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             sheet.merge_cells(start_row=17 + 2 * i, start_column=22, end_row=18 + 2 * i, end_column=22)
 
-            # End Station and Anzahl Nutzung
             station_name = sheet.cell(row=2, column=54 + 2 * i).value
             usage_count = sheet.cell(row=2, column=55 + 2 * i).value
             row_start = 17 + 2 * i
@@ -302,64 +285,52 @@ if __name__ == "__main__":
                 cell = sheet.cell(row=row, column=col)
                 cell.border = thick_border
 
-
-
-        # Erstes Säulendiagramm
+        # ** First Bar Chart **
         bar_chart1 = BarChart()
+        labels = ["Male", "Female", "Unknown"]
+        for col, label in enumerate(labels, start=4):  
+            sheet.cell(row=1, column=col, value=label)  
 
-        # Referenzen für Labels und Werte
-        labels_ref = Reference(sheet, min_col=4, min_row=1, max_col=6, max_row=1)  # D1:F1 für Labels
-        values_ref = Reference(sheet, min_col=4, min_row=2, max_col=6, max_row=2)  # D2:F2 für Werte
+        data_ref = Reference(sheet, min_col=4, min_row=1, max_col=6, max_row=2)   
 
-        # Daten und Kategorien hinzufügen
-        bar_chart1.add_data(values_ref, titles_from_data=False)
-        bar_chart1.set_categories(labels_ref)
+
+        bar_chart1.add_data(data_ref, titles_from_data=True)
         bar_chart1.title = "Usage Share by Gender"
 
-        # Diagrammgröße einstellen
         bar_chart1.width = 10
         bar_chart1.height = 12
 
-        # Diagramm in das Tabellenblatt einfügen
         sheet.add_chart(bar_chart1, "E38")
 
-        # Zweites Säulendiagramm
+        # Second Bar Chart
         bar_chart2 = BarChart()
 
-        # Referenzen für Labels und Werte
-        labels_ref2 = Reference(sheet, min_col=7, min_row=1, max_col=13, max_row=1)  # G1:M1 für Labels
-        values_ref2 = Reference(sheet, min_col=7, min_row=2, max_col=13, max_row=2)  # G2:M2 für Werte
+        data_ref2 = Reference(sheet, min_col=7, min_row=1, max_col=13, max_row=2)  
 
-        # Daten und Kategorien hinzufügen
-        bar_chart2.add_data(values_ref2, titles_from_data=False)
-        bar_chart2.set_categories(labels_ref2)
+        bar_chart2.add_data(data_ref2, titles_from_data=True)
+
         bar_chart2.title = "Usage Share by Age"
-
-        # Diagrammgröße einstellen
         bar_chart2.width = 10
         bar_chart2.height = 12
 
-        # Diagramm in das Tabellenblatt einfügen
         sheet.add_chart(bar_chart2, "N38")
 
-        # Drittes Säulendiagramm
+        # Third Bar Chart
         bar_chart3 = BarChart()
 
-        # Referenzen für Labels und Werte
-        labels_ref_bv_by = Reference(sheet, min_col=74, min_row=1, max_col=77, max_row=1)  # BV1:BY1 für Labels
-        values_ref_bv_by = Reference(sheet, min_col=74, min_row=2, max_col=77, max_row=2)  # BV2:BY2 für Werte
+        data_ref_bv_by = Reference(sheet, min_col=74, min_row=1, max_col=77, max_row=2)  
 
-        # Daten und Kategorien hinzufügen
-        bar_chart3.add_data(values_ref_bv_by, titles_from_data=False)
-        bar_chart3.set_categories(labels_ref_bv_by)
+        bar_chart3.add_data(data_ref_bv_by, titles_from_data=True)
+
         bar_chart3.title = "Sample Bar Chart for BV to BY"
-
-        # Diagrammgröße einstellen
         bar_chart3.width = 10
         bar_chart3.height = 12
 
-        # Diagramm in das Tabellenblatt einfügen
         sheet.add_chart(bar_chart3, "H50")
+
+        # Hide first and second row
+        sheet.row_dimensions[1].hidden = True  
+        sheet.row_dimensions[2].hidden = True 
 
 
     # Speichern der formatieren Excel-Datei
