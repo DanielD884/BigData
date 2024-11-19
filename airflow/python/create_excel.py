@@ -67,10 +67,10 @@ if __name__ == "__main__":
                             bottom=Side(style='thick', color='000000'))
 
         # Remove all existing borders in the range D5 to Y62
-        for row in range(5, 63):
-            for col in range(4, 29):  
+        for row in range(5, 63):  # Zeilen 5 bis 62
+            for col in range(4, 29):  # Spalten D (4) bis AB (28)
                 cell = sheet.cell(row=row, column=col)
-                cell.border = Border()
+                cell.border = None
 
         # Apply the thick border around the range D5 to Y62
         for row in range(5, 63):
@@ -300,6 +300,9 @@ if __name__ == "__main__":
         bar_chart1.width = 10
         bar_chart1.height = 12
 
+        bar_chart1.dataLabels = DataLabelList()
+        bar_chart1.dataLabels.showVal = True
+
         sheet.add_chart(bar_chart1, "E38")
 
         # Second Bar Chart
@@ -309,26 +312,34 @@ if __name__ == "__main__":
 
         bar_chart2.add_data(data_ref2, titles_from_data=True)
 
-        bar_chart2.title = "Usage Share by Age"
+        bar_chart2.title = "Usage Share by Generation"
         bar_chart2.width = 10
         bar_chart2.height = 12
+
+        bar_chart2.dataLabels = DataLabelList()
+        bar_chart2.dataLabels.showVal = True
 
         sheet.add_chart(bar_chart2, "N38")
 
         # Third Bar Chart
         bar_chart3 = BarChart()
 
+        labels = ["00.00-06.00", "06.00-12.00", "12.00-18.00", "18.00-24.00"]
+
+        for col, label in enumerate(labels, start=74):  
+            sheet.cell(row=1, column=col, value=label)  
+
         data_ref_bv_by = Reference(sheet, min_col=74, min_row=1, max_col=77, max_row=2)  
 
         bar_chart3.add_data(data_ref_bv_by, titles_from_data=True)
 
-        bar_chart3.title = "Sample Bar Chart for BV to BY"
+        bar_chart3.title = "Usage Share by Timeslot"
         bar_chart3.width = 10
         bar_chart3.height = 12
 
-        sheet.add_chart(bar_chart3, "H50")
+        bar_chart3.dataLabels = DataLabelList()
+        bar_chart3.dataLabels.showVal = True
 
+        sheet.add_chart(bar_chart3, "W38")
 
-
-    # Speichern der formatieren Excel-Datei
     workbook.save("/home/airflow/output/combined-kpis.xlsx")
