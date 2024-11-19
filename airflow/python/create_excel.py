@@ -70,7 +70,7 @@ if __name__ == "__main__":
         for row in range(5, 63):  # Zeilen 5 bis 62
             for col in range(4, 29):  # Spalten D (4) bis AB (28)
                 cell = sheet.cell(row=row, column=col)
-                cell.border = None
+                cell.border = Border()
 
         # Apply the thick border around the range D5 to Y62
         for row in range(5, 63):
