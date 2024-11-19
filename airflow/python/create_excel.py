@@ -328,9 +328,6 @@ if __name__ == "__main__":
 
         sheet.add_chart(bar_chart3, "H50")
 
-        # Hide first and second row
-        sheet.row_dimensions[1].hidden = True  
-        sheet.row_dimensions[2].hidden = True 
 
 
     # Speichern der formatieren Excel-Datei
