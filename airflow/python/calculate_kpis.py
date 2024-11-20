@@ -23,7 +23,7 @@ def calculate_average_kpis(df):
     avg_station_distance = avg_kpis["avg_station_distance"]
 
     return (
-        int(avg_trip_duration / 60) if avg_trip_duration is not None else 0,
+        round(float(avg_trip_duration / 60), 2) if avg_trip_duration is not None else 0,
         round(float(avg_station_distance), 2) if avg_station_distance is not None else 0.0
     )
 

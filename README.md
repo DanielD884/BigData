@@ -3,7 +3,7 @@
 **Autor:** Daniel Desgronte  
 **Institution:** DHBW Stuttgart
 
-Dieses Projekt analysiert Hubway Bike-Sharing-Daten und erstellt ein interaktives Dashboard, das zentrale **Kennzahlen (KPIs)** visualisiert.  
+Dieses Projekt analysiert Hubway Bike-Sharing-Daten und erstellt ein Excel-File mit Dashboards, das zentrale **Kennzahlen (KPIs)** visualisiert.  
 Es verwendet **Docker** und **Apache Airflow**, um eine automatisierte ETL-Pipeline (Extrahieren, Transformieren, Laden) zu implementieren.  
 Das Projekt wurde als **Projektabgabe für die Vorlesung Big Data** angefertigt.
 
@@ -17,7 +17,7 @@ Das Projekt wurde als **Projektabgabe für die Vorlesung Big Data** angefertigt.
 
 ## **Berechnete-KPIs**
 
-Jede der folgenden **Kennzahlen** wird monatlich berechnet und im Dashboard visualisiert:
+Jede der folgenden **Kennzahlen** wird monatlich berechnet und einzelnd über ein Dashboard visualisiert:
 
 ### **Allgemeine Statistiken**
 
