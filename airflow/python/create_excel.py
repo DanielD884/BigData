@@ -29,8 +29,6 @@ if __name__ == "__main__":
     args = get_args()
     year_months = ast.literal_eval(args.yearmonth)
 
-    print(year_months)
-
     # Initialize Spark Context
     sc = pyspark.SparkContext()
     spark = SparkSession(sc)
@@ -56,7 +54,7 @@ if __name__ == "__main__":
     
     for year_month in year_months:
         sheet = workbook[year_month]
-
+        sheet.title = sheet["A2"].value
         # Remove gridlines
         sheet.sheet_view.showGridLines = False
 

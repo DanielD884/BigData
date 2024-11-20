@@ -8,12 +8,13 @@ from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import col, udf
 from pyspark.sql.types import FloatType, IntegerType
 
-
+# Parsing Command Line Arguments
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--yearmonth", required=True, type=str)
     return parser.parse_args()
 
+# calculate the timeslot
 def determine_timeslot(hour: int) -> int:
     if 0 <= hour < 6:
         return 0
@@ -25,6 +26,7 @@ def determine_timeslot(hour: int) -> int:
         return 3
     return -1
 
+# check if the time is within the timeslot
 def is_within_timeslot(start_time: datetime, end_time: datetime, time_slot: int) -> int:
     start_slot = determine_timeslot(start_time.hour)
     end_slot = determine_timeslot(end_time.hour)
@@ -41,6 +43,7 @@ def is_within_timeslot(start_time: datetime, end_time: datetime, time_slot: int)
 
     return 0
 
+# calculate the age of the user based on the birth year
 def calculate_age(birth_year):
     try:
         age = datetime.now().year - int(birth_year)
@@ -50,7 +53,7 @@ def calculate_age(birth_year):
 
     return age
 
-
+# determine the generation based on the birth year
 def determine_generation(birth_year):
     try:
         year = int(birth_year)
@@ -70,7 +73,7 @@ def determine_generation(birth_year):
     except (ValueError, TypeError):
         return -1
 
-
+# calculate the haversine distance between two points
 def haversine(s_lat, s_lon, e_lat, e_lon):
     R = 6373.0  
 
@@ -148,7 +151,7 @@ if __name__ == "__main__":
             .where((col("trip_duration") > 0) & (col("trip_duration") < 86400))
         )
 
-        # 
+        # Calculate the distance between the start and end stations
         df_station_distance: DataFrame = df.groupBy(
             "start_station_latitude",
             "start_station_longitude",
@@ -180,6 +183,7 @@ if __name__ == "__main__":
             ],
         )
 
+        # Add new columns to the DataFrame using UDFs
         df = df.withColumn("generation", generation_udf(col("birth_year")))
         df = df.withColumn("age", age_udf(col("birth_year")))
         df = df.withColumn("timeslot_0", timeslot_0_udf(col("start_time"), col("end_time")))
@@ -187,13 +191,15 @@ if __name__ == "__main__":
         df = df.withColumn("timeslot_2", timeslot_2_udf(col("start_time"), col("end_time")))
         df = df.withColumn("timeslot_3", timeslot_3_udf(col("start_time"), col("end_time")))
 
+        # Drop unnecessary columns
         df = df.drop(
             "start_time",
             "end_time",
             "start_station_latitude",
             "start_station_longitude",
             "end_station_latitude",
-            "end_station_longitude"
+            "end_station_longitude",
+            "birth_year"
         )
 
         # Write data to HDFS

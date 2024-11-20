@@ -12,6 +12,7 @@ def parse_arguments():
     parser.add_argument("--yearmonth", required=True, type=str)
     return parser.parse_args()
 
+# calculate the average KPIs for trip duration and station distance
 def calculate_average_kpis(df):
     avg_kpis = df.agg(
         avg("trip_duration").alias("avg_trip_duration"),
@@ -26,7 +27,7 @@ def calculate_average_kpis(df):
         round(float(avg_station_distance), 2) if avg_station_distance is not None else 0.0
     )
 
-
+# calculate the gender share for the given gender type
 def calculate_gender_share(df, gender_type=None):
     gender_df: DataFrame = df.groupBy(col("gender")).count().collect()
     gender_counts = {row['gender']: row['count'] for row in gender_df}
@@ -37,9 +38,9 @@ def calculate_gender_share(df, gender_type=None):
     gender_count = gender_count_na + gender_count_m + gender_count_f
 
     if gender_count > 0:
-        m = float(gender_count_m / gender_count * 100)
-        w = float(gender_count_f / gender_count * 100)
-        na = float(gender_count_na / gender_count * 100)
+        m = round(float(gender_count_m / gender_count * 100),2)
+        w = round(float(gender_count_f / gender_count * 100),2)
+        na = round(float(gender_count_na / gender_count * 100),2)
         
         if gender_type == "m":
             return m
@@ -50,7 +51,7 @@ def calculate_gender_share(df, gender_type=None):
         else:
             return 0.0
    
-
+# calculate the top n values for the given column
 def calculate_top_n(df, column_name, rank, return_type="value"):
     top_n = df.groupBy(column_name).count().orderBy(desc("count")).limit(rank).collect()
     
@@ -60,7 +61,7 @@ def calculate_top_n(df, column_name, rank, return_type="value"):
     else:
         return None if return_type == "value" else 0
 
-
+# calculate the percentage of the given time slot
 def calculate_time_slot_percentage(df, slot):
     try:
         total_count = df.count() 
@@ -70,12 +71,14 @@ def calculate_time_slot_percentage(df, slot):
         percentage = 0
     return round(percentage, 2)
 
+# calculate the percentage of the given generation
 def calculate_generation_percentage(df, generation_value):
     total_count = df.count()  
     generation_count = df.filter(col("generation") == generation_value).count()
     percentage = (generation_count / total_count) * 100 if total_count > 0 else 0
     return round(percentage, 2)
 
+# format the year month to the format MM.YYYY
 def format_year_month(year_month):
     return f"{year_month[4:6]}.{year_month[:4]}"
 
@@ -170,6 +173,7 @@ def process_year_month(spark, year_month):
         .load(cleaned_file)
     )
 
+    # Calculate Average KPIs for Trip Duration and Distance
     avg_trip_duration, avg_trip_distance = calculate_average_kpis(df)
 
     # Calculate gender share
@@ -261,7 +265,7 @@ def process_year_month(spark, year_month):
     # Change Layout year_month
     year_month = format_year_month(year_month)
 
-
+    # Create new DataFrame with KPIs
     kpis_df = spark.createDataFrame(
         [
             row(
