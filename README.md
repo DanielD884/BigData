@@ -274,6 +274,7 @@ start-all.sh
 Bei der Ausfürhung auf einer VM auf der Google Cloud Platform, kann es zu Problemen kommen, dass der Airflow keine Schreibrechte hat, um die erstelle Excelfile in dem lokalen Verzeichnis data/outout/ zu schreiben. Deshalb ist vorher die notwendigen Rechte zu vergeben.
 
 ```bash
+cd BigData
 sudo chmod 777 data/output/
 
 ```
