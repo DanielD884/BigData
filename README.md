@@ -271,7 +271,7 @@ start-all.sh
 
 ### Probleme
 
-Bei der Ausfürhung auf einer VM auf der Google Cloud Platform, kann es zu Problemen kommen, dass der Airflow keine Schreibrechte hat, um die erstelle Excelfile in dem lokalen Verzeichnis data/outout/ zu schreiben. Deshalb ist vorher die notwendigen Rechte zu vergeben.
+Bei der Ausfürhung auf einer VM auf der Google Cloud Platform, kann es zu Problemen kommen, dass der Airflow keine Schreibrechte hat, um die erstelle Excelfile in dem lokalen Verzeichnis data/outout/ und in den Dockercontainer zu schreiben. Deshalb ist vorher die notwendigen Rechte zu vergeben.
 
 ```bash
 cd BigData
@@ -279,6 +279,17 @@ sudo chmod 777 data/output/
 
 ```
 
+```bash
+docker exec -it airflow bash
+chmod -R 777 /home/airflow/output
+```
+
 ### Airflow Dags starten
 
 Nun kann der Airflow-Server unter lokale VM(http://localhost:8080/) oder über die Google Cloud (<externe-IP>:8080) aufgerufen werden. Hier kann der Dags gestartet werden.
+
+### Herunterladen der KPIs im Excel-File
+
+```bash
+gcloud compute scp <Name der gCloud>:/home/<user>/BigData/data/output/combined-kpis.xlsx ~/Downloads/
+```
